@@ -1,0 +1,4 @@
+pandas: https://pandas.pydata.org/docs/user_guide/
+numpy: https://numpy.org/doc/stable/reference/
+networkx: https://networkx.org/documentation/stable/reference/index.html
+pyplot: https://matplotlib.org/stable/plot_types/index.html

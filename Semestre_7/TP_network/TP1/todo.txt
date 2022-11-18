@@ -1,0 +1,5 @@
+Creat a Python script taking in inputs: Nodes.dat and Links.dat
+It has to generate two outputs, A and B
+
+A: A network representation in PDF format (Use networkx draw function)
+B: A file in TSV format (Tabula Separated Values) consisiting in the list of nodes with their respective degree, betweeness and closeness values. Try to do your own algorithm, then compare your results with built-in networkx function
