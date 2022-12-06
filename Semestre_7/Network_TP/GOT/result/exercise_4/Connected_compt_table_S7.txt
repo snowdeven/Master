@@ -1,0 +1,2 @@
+Number of Connected_components : 1
+relative size : 1.0

@@ -1,0 +1,72 @@
+---------------------------------------
+| Weighted_degree_centrality season 1 |
+---------------------------------------
+Name,Value
+NED,1290.0
+TYRION,709.0
+CATELYN,584.0
+ROBERT,563.0
+JON,535.0
+---------------------------------------
+| Weighted_degree_centrality season 2 |
+---------------------------------------
+Name,Value
+TYRION,960.0
+CERSEI,549.0
+ARYA,481.0
+THEON,447.0
+JOFFREY,425.0
+---------------------------------------
+| Weighted_degree_centrality season 3 |
+---------------------------------------
+Name,Value
+TYRION,653.0
+ROBB,375.0
+TYWIN,366.0
+SANSA,363.0
+CERSEI,354.0
+---------------------------------------
+| Weighted_degree_centrality season 4 |
+---------------------------------------
+Name,Value
+TYRION,876.0
+CERSEI,619.0
+JAIME,598.0
+TYWIN,586.0
+JON,542.0
+---------------------------------------
+| Weighted_degree_centrality season 5 |
+---------------------------------------
+Name,Value
+CERSEI,590.0
+JON,552.0
+TYRION,480.0
+DAENERYS,413.0
+STANNIS,390.0
+---------------------------------------
+| Weighted_degree_centrality season 6 |
+---------------------------------------
+Name,Value
+JON,598.0
+SANSA,549.0
+TYRION,442.0
+JAIME,407.0
+DAVOS,394.0
+---------------------------------------
+| Weighted_degree_centrality season 7 |
+---------------------------------------
+Name,Value
+JON,968.0
+DAENERYS,733.0
+TYRION,693.0
+CERSEI,588.0
+SANSA,542.0
+---------------------------------------
+| Weighted_degree_centrality season 8 |
+---------------------------------------
+Name,Value
+TYRION,1062.0
+JON,914.0
+DAENERYS,843.0
+JAIME,586.0
+SANSA,577.0
