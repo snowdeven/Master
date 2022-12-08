@@ -3,8 +3,10 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import os
 from settings import *
+
 
 
 def Data(S):
@@ -109,7 +111,7 @@ def Txt_imp_char(S,n,G):
 def Txt_stats(S,G):
     """Create a txt file for all the character with their values in terms of degree, closesnees or betweeness for the season s
     Args:
-        s (int): the number of a season
+        S (int): the number of a season
         n (int): variable to choose how many we want for the most important character
         G (networkx.graph): Graph on a file with nodes, edges and labels
     """    
@@ -136,7 +138,32 @@ def Txt_stats(S,G):
         file.write(str(Name[i])+","+str(Value_d[i])+","+str(Value_c[i])+","+str(Value_b[i])+"\n")
         
     file.close()
-    
+
+
+def draw(S,G):
+    """Function to plot the graph with better parameter
+
+    Args:
+        S (int): the number of a season
+        G (networkx.graph): Graph on a file with nodes, edges and labels
+    """    
+    pos = nx.spring_layout(G,k=1.5,iterations=100)
+    d=nx.degree_centrality(G)
+    w=Data(S)[5]
+    nx.draw_networkx(G,pos,with_labels=False
+                    ,node_color=houses_colors(G,S)[0]
+                    ,node_size=[d[k]*300 for k in d]
+                    ,width=1
+                    # ,width=[w[k]/20 for k in w]
+                    ,edge_color='gray'
+                    ,style='--')
+    for node, (x, y) in pos.items():
+        plt.text(x, y, node, fontsize=(3*np.log(d[node]+1)+0.5), ha='center', va='center')
+
+
+
+
+
 
 def Mat_adj(S,Weighted=False):
     """Define the adjacency matrix for a graph of a season s. 
@@ -186,3 +213,70 @@ def Hist_Weight(S):
     plt.hist(w,bins=bin,color="c",edgecolor="black")
     plt.xlabel("Weight")
     plt.ylabel("Frequency")
+
+
+def houses_colors(G,S):
+
+    colors ={"WESTEROS":"red","BARATHEON":"yellow","ARRYN":"orange","TULLY":"darkgoldenrod","MARTELL" : "lime"
+            ,"BOLTON":"forestgreen","LANNISTER":"turquoise","TARGARYEN":"royalblue","TYRELL":"lightsalmon"
+            ,"STARK":"blueviolet","WALL":"blue","GREYJOY":"olive","ESSOS":"peru","FREY" : "darkseagreen"}
+    houses_colors = []
+    label_colors=[]
+    nodes=G.nodes()
+    for i in nodes:
+        x=Data(S)[2][Data(S)[0].index(i)]
+        houses_colors.append(colors.get(x))
+        label_colors.append(x)
+    return houses_colors, label_colors
+
+
+
+
+def attack(G,A,f):
+    G_copy = G.copy()
+    for i in range(int(f*A)):
+        removed_node=np.random.choice(list(G_copy.nodes()))
+        G_copy.remove_node(removed_node)
+
+    return G_copy
+
+
+
+def evolution(S,animation=False):
+    A=len(Data(S)[6])
+    mean=[]
+    value_f=[]
+    for f in np.arange(0,1.05,0.05):
+        G=Data(S)[6]
+        G_reduced=attack(G,A,f)
+        
+        size=[len(c) for c in sorted(nx.connected_components(G_reduced), key=len, reverse=True)]
+        
+        if len(G_reduced) == 0:
+            mean.append(0)
+            break
+        else:
+            mean.append(np.mean(size))
+            value_f.append(f*100)
+            if animation == True:
+                pos = nx.spring_layout(G_reduced,k=1.5,iterations=100)
+                d=nx.degree_centrality(G_reduced)
+                plt.subplot(121)
+                nx.draw_networkx(G_reduced,pos,with_labels=False
+                                ,node_color=houses_colors(G_reduced,S)[0]
+                                ,node_size=[d[k]*500 for k in d]
+                                ,width=[d[k]*3 for k in d]
+                                ,edge_color='gray')
+                for node, (x, y) in pos.items():
+                    plt.text(x, y, node, fontsize=(15*np.log(d[node]+1)+10), ha='center', va='center')
+                plt.subplot(122)
+                plt.plot(value_f,mean)
+                plt.pause(0.01)
+                plt.clf()
+    plt.show()
+    return mean
+
+
+# def count(l):
+#     return (np.diff(l)!=0).sum()
+

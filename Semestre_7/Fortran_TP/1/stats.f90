@@ -34,50 +34,63 @@ module stats
             deter=a-b+c
         end function deter
 
-        function Compute(x,y,w,z,Nb)
+        function Compute(w,x,y,weight,z,Nb)
         
             implicit none 
+            real , parameter :: pi=3.1415926536
             integer :: Nb, z
-            real(kind=8), dimension(:) :: x, y, w
+            real(kind=8), dimension(:) :: w, x, y, weight
             real(kind=8),dimension(3,3) :: coef, coef_var
             real(kind=8),dimension(3) :: Compute
+            real(kind=8),dimension(3) :: val
             real(kind=8),dimension(3) :: col
             integer :: i, j
         
 
             do i=1,3
                 do j=1,3
-                    ! coef(i,j) = sum(x**(int(i+j-2)))/Nb
-                    coef(i,j)=mean((w**z)*x**(int(i+j-2)),Nb)
+                    coef(i,j)=mean((weight**z)*x**(int(i+j-2)),Nb)
                 end do 
             end do 
             
-            col(1)=mean((w**z)*y,Nb)
-            col(2)=mean((w**z)*y*x,Nb)
-            col(3)=mean((w**z)*y*x**2,Nb)
+
+            col(1)=mean((weight**z)*y,Nb)
+            col(2)=mean((weight**z)*y*x,Nb)
+            col(3)=mean((weight**z)*y*x**2,Nb)
             
             
 
             coef_var=coef
             coef_var(:,1)=col
-            Compute(1)=deter(coef_var)/deter(coef)
+            val(1)=deter(coef_var)/deter(coef)
             
             coef_var=coef
             coef_var(:,2)=col
-            Compute(2)=deter(coef_var)/deter(coef)
+            val(2)=deter(coef_var)/deter(coef)
             
             coef_var=coef
             coef_var(:,3)=col
-            Compute(3)=deter(coef_var)/deter(coef)
+            val(3)=deter(coef_var)/deter(coef)
             
+
+            Compute(1)= mean(w,Nb) - (std(w,Nb)*val(2))/(2*val(3))
+            Compute(2)=std(w,Nb)*sqrt((val(1)/val(3))-(val(2)/2*val(3))**2)
+            Compute(3)=(pi*std(w,Nb)) /sqrt(val(1)*val(3) - (val(2)**2 /4))
+        
         end function Compute
         
         function Lorentz(omega,S,gamma,Omega_m)
+            
             implicit none
             real(kind=8), intent(in) :: omega, S, gamma, Omega_m
             real(kind=8) :: Lorentz
             real , parameter :: pi=3.14159265
             Lorentz= (S*gamma)/(pi*((omega-Omega_m)**2 + gamma**2))
         end function Lorentz
-                
+        character(len=20) function str(k)
+        !   "Convert an integer to string."
+            integer, intent(in) :: k
+            write (str, *) k
+            str = adjustl(str)
+        end function str
 end module stats
