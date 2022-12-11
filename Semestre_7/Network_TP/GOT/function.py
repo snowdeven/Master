@@ -1,11 +1,9 @@
-from ast import get_docstring
+import os
+import random
+import numpy as np
 import networkx as nx
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import os
-from settings import *
 
 
 
@@ -80,32 +78,27 @@ def Txt_imp_char(S,n,G):
         s (int): the number of a season
         n (int): variable to choose how many we want for the most important character
         G (networkx.graph): Graph on a file with nodes, edges and labels
-
+ 
     """    
     a=Important_char(nx.degree_centrality,n,G)
-
     b=Important_char(nx.closeness_centrality,n,G)
-
     c=Important_char(nx.betweenness_centrality,n,G)
-    file = open(os.path.join(os.path.dirname(__file__),f"result/exercise_2/GOT_Most_important_S{S}.txt"),"w") #"w" to open a file and erase the previous data if he is already exsit
-    file = open(os.path.join(os.path.dirname(__file__),f"result/exercise_2/GOT_Most_important_S{S}.txt"),"a") #"a" to open a file and add the data after the previous one
-
+    file = open(os.path.join(os.path.dirname(__file__),f"result/exercise_2/GOT_Most_important_S{S}.txt"),"w")
+    #"w" to open a file and erase the previous data if he is already exsit
+    file = open(os.path.join(os.path.dirname(__file__),f"result/exercise_2/GOT_Most_important_S{S}.txt"),"a")
+    #"a" to open a file and add the data after the previous one
     Title="| degree_centrality |"
     file.write("-"*len(Title)+"\n"+Title +"\n"+"-"*len(Title)+"\n")
     for i in range(len(a[0])):
         file.write(a[0][i]+","+str(a[1][i])+"\n") 
-
     Title="| closeness_centrality |"
     file.write("-"*len(Title)+"\n"+Title +"\n"+"-"*len(Title)+"\n")
     for i in range(len(a[0])):
         file.write(b[0][i]+","+str(b[1][i])+"\n")
-
     Title="| betweeness_centrality |"
     file.write("-"*len(Title)+"\n"+Title +"\n"+"-"*len(Title)+"\n")
     for i in range(len(a[0])):
         file.write(c[0][i]+","+str(c[1][i])+"\n")
-
-
     file.close()
 
 def Txt_stats(S,G):
@@ -140,30 +133,6 @@ def Txt_stats(S,G):
     file.close()
 
 
-def draw(S,G):
-    """Function to plot the graph with better parameter
-
-    Args:
-        S (int): the number of a season
-        G (networkx.graph): Graph on a file with nodes, edges and labels
-    """    
-    pos = nx.spring_layout(G,k=1.5,iterations=100)
-    d=nx.degree_centrality(G)
-    w=Data(S)[5]
-    nx.draw_networkx(G,pos,with_labels=False
-                    ,node_color=houses_colors(G,S)[0]
-                    ,node_size=[d[k]*300 for k in d]
-                    ,width=1
-                    # ,width=[w[k]/20 for k in w]
-                    ,edge_color='gray'
-                    ,style='--')
-    for node, (x, y) in pos.items():
-        plt.text(x, y, node, fontsize=(3*np.log(d[node]+1)+0.5), ha='center', va='center')
-
-
-
-
-
 
 def Mat_adj(S,Weighted=False):
     """Define the adjacency matrix for a graph of a season s. 
@@ -172,7 +141,7 @@ def Mat_adj(S,Weighted=False):
     or equal to the weight of the link between the node i and j for the Weighted adjacency matrix.
 
     Args:
-        s (int): the number of a season
+        S (int): the number of a season
         Weighted (bool, optional): boolean to precise the tpe of matrix, weighted or not. Defaults to False.
 
     Returns:
@@ -181,6 +150,7 @@ def Mat_adj(S,Weighted=False):
     Id=Data(S)[0]
     Source=Data(S)[3]
     Target=Data(S)[4]
+    Weight=Data(S)[5]
     
     L_S=len(Source)
     L_I=len(Id)
@@ -192,8 +162,8 @@ def Mat_adj(S,Weighted=False):
         
         if Weighted == True :
             
-            mat_adj[a,b]=Data(S)[5][i]
-            mat_adj[b,a]=Data(S)[5][i]
+            mat_adj[a,b]=Weight[i]
+            mat_adj[b,a]=Weight[i]
         else:
             mat_adj[a,b]=1
             mat_adj[b,a]=1
@@ -216,67 +186,163 @@ def Hist_Weight(S):
 
 
 def houses_colors(G,S):
+    """define function to link some colors for each houses
 
+    Args:
+        G (graph.networkx): graph for the season S
+        S (int): the number of a season
+
+    Returns:
+        houses_colors (list) : colors for each nodes in the order of G
+    """    
     colors ={"WESTEROS":"red","BARATHEON":"yellow","ARRYN":"orange","TULLY":"darkgoldenrod","MARTELL" : "lime"
             ,"BOLTON":"forestgreen","LANNISTER":"turquoise","TARGARYEN":"royalblue","TYRELL":"lightsalmon"
             ,"STARK":"blueviolet","WALL":"blue","GREYJOY":"olive","ESSOS":"peru","FREY" : "darkseagreen"}
     houses_colors = []
-    label_colors=[]
     nodes=G.nodes()
+    Id=Data(S)[0]
+    houses=Data(S)[2]
     for i in nodes:
-        x=Data(S)[2][Data(S)[0].index(i)]
+        x=houses[Id.index(i)]
         houses_colors.append(colors.get(x))
-        label_colors.append(x)
-    return houses_colors, label_colors
+    return houses_colors
 
 
 
 
 def attack(G,A,f):
-    G_copy = G.copy()
+    """define a fonction to create a copy of G and remove the fraction f*A of it
+
+    Args:
+        G (graph.networkx): graph for the season S
+        A (int): len of G
+        f (float): percentage that we want to remove from the copy of G
+
+    Returns:
+        G (graph.networkx): graph for the season S with f*A removed
+    """    
+    G_reduced = G.copy()
     for i in range(int(f*A)):
-        removed_node=np.random.choice(list(G_copy.nodes()))
-        G_copy.remove_node(removed_node)
+        removed_node=random.choice(list(G_reduced.nodes()))
+        G_reduced.remove_node(removed_node)
 
-    return G_copy
+    return G_reduced
 
 
 
-def evolution(S,animation=False):
-    A=len(Data(S)[6])
+def evolution(G,S,pos,N):
+    """ define fonction to compute the average size of nodes for all the subgraph for a season S
+    or compute the mean of the relative size
+    if N is equal to one a animation start tunning to animate the evolution of:
+    the graph when we remove A*f nodes
+    the average size of nodes for all the subgraph for a season S
+
+    Args:
+        G (graph.networkx): graph for the season S
+        S (int): the number of a season
+        pos (dict): dictonnary of the position of the node 
+        N (int): the number to do the mean
+
+    Returns:
+        mean (list): list of the relative size for N trials
+    """    
+    A=len(G)
     mean=[]
     value_f=[]
+    
     for f in np.arange(0,1.05,0.05):
-        G=Data(S)[6]
         G_reduced=attack(G,A,f)
-        
         size=[len(c) for c in sorted(nx.connected_components(G_reduced), key=len, reverse=True)]
-        
+    
         if len(G_reduced) == 0:
             mean.append(0)
             break
-        else:
-            mean.append(np.mean(size))
-            value_f.append(f*100)
-            if animation == True:
-                pos = nx.spring_layout(G_reduced,k=1.5,iterations=100)
-                d=nx.degree_centrality(G_reduced)
-                plt.subplot(121)
-                nx.draw_networkx(G_reduced,pos,with_labels=False
-                                ,node_color=houses_colors(G_reduced,S)[0]
-                                ,node_size=[d[k]*500 for k in d]
-                                ,width=[d[k]*3 for k in d]
-                                ,edge_color='gray')
-                for node, (x, y) in pos.items():
-                    plt.text(x, y, node, fontsize=(15*np.log(d[node]+1)+10), ha='center', va='center')
-                plt.subplot(122)
-                plt.plot(value_f,mean)
-                plt.pause(0.01)
-                plt.clf()
+        
+        mean.append(sum(size)/len(size))
+        value_f.append(f*100)
+        if N == 1:
+            
+            d=nx.degree_centrality(G_reduced)
+            plt.subplot(121)
+            nx.draw_networkx(G_reduced,pos,with_labels=True
+                            ,node_color=houses_colors(G_reduced,S)
+                            ,node_size=[d[k]*500 for k in d]
+                            ,width=[d[k]*3 for k in d]
+                            ,edge_color='gray'
+                            ,font_size=5)
+            plt.title(f"season {S} graph with {round(f*100,2)} % removed nodes")
+            plt.subplot(122)
+            plt.plot(value_f,mean)
+            plt.xlabel("percentage of nodes removed")
+            plt.ylabel("average of c")
+            plt.pause(0.01)
+            plt.clf()
     plt.show()
     return mean
 
 
-# def count(l):
-#     return (np.diff(l)!=0).sum()
+
+def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
+    """define covided fonction to compute algorithm SIS 
+    
+    Args:
+        Beta (float): proba for the infection
+        mu (float): proba for the recovery 
+        f (float): percentage of the fraction nodes that has to be removed
+        w_matrix (matrix weighted): weighted adjacency matrix 
+        Id (list): list of name's character
+        G (graph.networkx): graph for the season S
+        nb_i (array): array of zero
+        S (int, optional): number of the season. Defaults to 1.
+        weighted (bool, optional): bool to define if we want weighted the interaction between character . Defaults to False.
+
+    Returns:
+        nodes_state (dict): dictionnary of nodes states we return it at the end for t_max
+        nodes_state_counter (dict): dictionnary of nodes with the values of how many times they had been infected
+        nb_i(array): array of number infected character for each time
+    """
+    Max_step = 100
+    nodes = list(G.nodes())
+    time_step=0
+    
+    I = random.sample(nodes, k=int(f*len(nodes)))
+    nodes_state={key:(0 if key not  in I else 1) for key in nodes }
+    nodes_state_counter={key:(0 if value == 0 else 1) for key, value in nodes_state.items() }
+    
+    file = open(os.path.join(os.path.dirname(__file__),f"result/Part_2/Covid_stats-initial-S{S}-{Beta,mu}.txt"),"w")#"w" to open a file and erase the previous data if he is already exsit
+    file = open(os.path.join(os.path.dirname(__file__),f"result/Part_2/Covid_stats-initial-S{S}-{Beta,mu}.txt"),"a")#"a" to open a file and add the data after the previous one
+    file.write(f"Name,states\n")
+    for item in nodes_state:
+        if nodes_state[item] != 0:  
+            file.write(f"{item},{nodes_state[item]}\n")
+    
+    while time_step < Max_step and len(nodes) > 0:
+        random_node = random.choice(nodes)
+        
+        if not nodes_state[random_node] == 0:
+            for neighbors in G.neighbors(random_node):
+                if nodes_state[neighbors] == 0:
+                    if weighted is True:
+                        a=Id.index(random_node)
+                        b=Id.index(neighbors)
+                        weight=int(w_matrix[a,b])
+                    else: 
+                        weight = 1
+                    for i in range(weight):
+                        proba_i=random.random()
+                        if proba_i <= Beta: 
+                            nodes_state[neighbors] = 1
+                            nodes_state_counter[neighbors] += 1
+                            break
+            proba_s=random.random()
+            if proba_s <= mu:
+                nodes_state[random_node] = 0
+        nodes.remove(random_node)
+        nb_i[time_step]=sum(list(nodes_state.values()))/len(G)
+        time_step += 1
+
+    nodes_state_counter=sorted(nodes_state_counter.items(), key=lambda x:x[1],reverse=True)
+    return nodes_state,nodes_state_counter,nb_i
+
+
 
