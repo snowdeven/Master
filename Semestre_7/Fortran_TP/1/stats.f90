@@ -23,16 +23,27 @@ module stats
 
         end function std
 
-        function deter(mat)
+        function deter_3(mat)
             implicit none
             real(kind=8), intent(in) :: mat(3,3)
-            real(kind=8) :: a,b,c,deter
+            real(kind=8) :: a,b,c,deter_3
         
             a=mat(1,1)*(mat(2,2)*mat(3,3)-mat(3,2)*mat(2,3))
             b=mat(1,2)*(mat(2,1)*mat(3,3)-mat(3,1)*mat(2,3))
             c=mat(1,3)*(mat(2,1)*mat(3,2)-mat(3,1)*mat(2,2))
-            deter=a-b+c
-        end function deter
+            deter_3=a-b+c
+        end function deter_3
+
+        function deter_2(mat)
+            implicit none
+            real(kind=8), intent(in) :: mat(2,2)
+            real(kind=8) :: a,b,deter_2
+        
+            a=mat(1,1)*mat(2,2)
+            b=mat(1,2)*mat(2,1)
+            deter_2=a-b
+        end function deter_2
+
 
         function Compute(w,x,y,weight,z,Nb)
         
@@ -62,15 +73,15 @@ module stats
 
             coef_var=coef
             coef_var(:,1)=col
-            val(1)=deter(coef_var)/deter(coef)
+            val(1)=deter_3(coef_var)/deter_3(coef)
             
             coef_var=coef
             coef_var(:,2)=col
-            val(2)=deter(coef_var)/deter(coef)
+            val(2)=deter_3(coef_var)/deter_3(coef)
             
             coef_var=coef
             coef_var(:,3)=col
-            val(3)=deter(coef_var)/deter(coef)
+            val(3)=deter_3(coef_var)/deter_3(coef)
             
 
             Compute(1)= mean(w,Nb) - (std(w,Nb)*val(2))/(2*val(3))

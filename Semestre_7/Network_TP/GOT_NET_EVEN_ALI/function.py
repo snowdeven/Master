@@ -78,7 +78,7 @@ def Txt_imp_char(S,n,G):
         s (int): the number of a season
         n (int): variable to choose how many we want for the most important character
         G (networkx.graph): Graph on a file with nodes, edges and labels
- 
+
     """    
     a=Important_char(nx.degree_centrality,n,G)
     b=Important_char(nx.closeness_centrality,n,G)
@@ -172,17 +172,21 @@ def Mat_adj(S,Weighted=False):
 
 
 def Hist_Weight(S):
-    """Create a histogram of of the links weight for the season S.
+    """Create a histogram of the links weight for the season S.
     Args:
         S (int): the number of a season
-    """    
-    plt.title(f"season_{S}")
+    """ 
+    plt.title(f"season {S}", size=6)
     w=Data(S)[5]
     bindwith=1
     bin = range(min(w), max(w)+ bindwith, bindwith)
     plt.hist(w,bins=bin,color="c",edgecolor="black")
-    plt.xlabel("Weight")
-    plt.ylabel("Frequency")
+
+    # Reduce the font size of the x and y values
+    plt.tick_params(labelsize=5)
+
+    plt.xlabel("Weight", size=5)
+    plt.ylabel("Frequency", size=5)
 
 
 def houses_colors(G,S):
@@ -210,17 +214,17 @@ def houses_colors(G,S):
 
 
 
-def attack(G,A,f):
-    """define a fonction to create a copy of G and remove the fraction f*A of it
+def attack(G,f):
+    """define a function to create a copy of G and remove the fraction f of it
 
     Args:
         G (graph.networkx): graph for the season S
-        A (int): len of G
         f (float): percentage that we want to remove from the copy of G
 
     Returns:
-        G (graph.networkx): graph for the season S with f*A removed
+        G_reduced (graph.networkx): graph for the season S with f*A nodes removed
     """    
+    A = len(G)
     G_reduced = G.copy()
     for i in range(int(f*A)):
         removed_node=random.choice(list(G_reduced.nodes()))
@@ -229,60 +233,7 @@ def attack(G,A,f):
     return G_reduced
 
 
-
-def evolution(G,S,pos,N):
-    """ define fonction to compute the average size of nodes for all the subgraph for a season S
-    or compute the mean of the relative size
-    if N is equal to one a animation start tunning to animate the evolution of:
-    the graph when we remove A*f nodes
-    the average size of nodes for all the subgraph for a season S
-
-    Args:
-        G (graph.networkx): graph for the season S
-        S (int): the number of a season
-        pos (dict): dictonnary of the position of the node 
-        N (int): the number to do the mean
-
-    Returns:
-        mean (list): list of the relative size for N trials
-    """    
-    A=len(G)
-    mean=[]
-    value_f=[]
-    
-    for f in np.arange(0,1.05,0.05):
-        G_reduced=attack(G,A,f)
-        size=[len(c) for c in sorted(nx.connected_components(G_reduced), key=len, reverse=True)]
-    
-        if len(G_reduced) == 0:
-            mean.append(0)
-            break
-        
-        mean.append(sum(size)/len(size))
-        value_f.append(f*100)
-        if N == 1:
-            
-            d=nx.degree_centrality(G_reduced)
-            plt.subplot(121)
-            nx.draw_networkx(G_reduced,pos,with_labels=True
-                            ,node_color=houses_colors(G_reduced,S)
-                            ,node_size=[d[k]*500 for k in d]
-                            ,width=[d[k]*3 for k in d]
-                            ,edge_color='gray'
-                            ,font_size=5)
-            plt.title(f"season {S} graph with {round(f*100,2)} % removed nodes")
-            plt.subplot(122)
-            plt.plot(value_f,mean)
-            plt.xlabel("percentage of nodes removed")
-            plt.ylabel("average of c")
-            plt.pause(0.01)
-            plt.clf()
-    plt.show()
-    return mean
-
-
-
-def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
+def covided(Beta,mu,f,w_matrix,Id,G,S=1, weighted=False):
     """define covided fonction to compute algorithm SIS 
     
     Args:
@@ -292,7 +243,6 @@ def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
         w_matrix (matrix weighted): weighted adjacency matrix 
         Id (list): list of name's character
         G (graph.networkx): graph for the season S
-        nb_i (array): array of zero
         S (int, optional): number of the season. Defaults to 1.
         weighted (bool, optional): bool to define if we want weighted the interaction between character . Defaults to False.
 
@@ -304,19 +254,33 @@ def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
     Max_step = 100
     nodes = list(G.nodes())
     time_step=0
-    
+    # number of infection at each time step
+    nb_i=np.zeros(100)
+
     I = random.sample(nodes, k=int(f*len(nodes)))
     nodes_state={key:(0 if key not  in I else 1) for key in nodes }
     nodes_state_counter={key:(0 if value == 0 else 1) for key, value in nodes_state.items() }
-    
-    file = open(os.path.join(os.path.dirname(__file__),f"result/Part_2/Covid_stats-initial-S{S}-{Beta,mu}.txt"),"w")#"w" to open a file and erase the previous data if he is already exsit
-    file = open(os.path.join(os.path.dirname(__file__),f"result/Part_2/Covid_stats-initial-S{S}-{Beta,mu}.txt"),"a")#"a" to open a file and add the data after the previous one
+
+    file = open(os.path.join(os.path.dirname(__file__), f"result/Part_2/Covid_stats-initial-S{S}-{Beta, mu}.txt"),
+                    "w")  # "w" to open a file and erase the previous data if he is already exsit
+    file = open(os.path.join(os.path.dirname(__file__), f"result/Part_2/Covid_stats-initial-S{S}-{Beta, mu}.txt"),
+                    "a")  # "a" to open a file and add the data after the previous one
+
+
+
+    if weighted is True:
+        file = open(os.path.join(os.path.dirname(__file__), f"result/Part_2/Covid_stats-initial-S{S}-{Beta, mu}_weighted.txt"),
+                    "w")  # "w" to open a file and erase the previous data if he is already exsit
+        file = open(os.path.join(os.path.dirname(__file__), f"result/Part_2/Covid_stats-initial-S{S}-{Beta, mu}_weighted.txt"),
+                    "a")  # "a" to open a file and add the data after the previous one
+
     file.write(f"Name,states\n")
     for item in nodes_state:
         if nodes_state[item] != 0:  
             file.write(f"{item},{nodes_state[item]}\n")
     
     while time_step < Max_step and len(nodes) > 0:
+
         random_node = random.choice(nodes)
         
         if not nodes_state[random_node] == 0:
@@ -328,6 +292,7 @@ def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
                         weight=int(w_matrix[a,b])
                     else: 
                         weight = 1
+
                     for i in range(weight):
                         proba_i=random.random()
                         if proba_i <= Beta: 
@@ -344,5 +309,81 @@ def covided(Beta,mu,f,w_matrix,Id,G,nb_i,S=1, weighted=False):
     nodes_state_counter=sorted(nodes_state_counter.items(), key=lambda x:x[1],reverse=True)
     return nodes_state,nodes_state_counter,nb_i
 
+#plot the evolution of the ratio of infected characters with time step τ for weghted and unweighted
+def covid_plot(weighted):
+    """ define a function to draw the covid related plot
+
+    Args:
+        weighted (Bool): boolean to mean if we want the weighted case or not
+
+    Returns:
+        (string): "error" means weighted option are stwich with not boolean type
+    """    
+    time = np.linspace(0, 100, 100)
+    mean = np.zeros(100)
+    parameters = ((0.5, 0.5), (0.3, 0.7), (0.7, 0.3))
+    Nb = 1000
+    w_matrix = Mat_adj(1, True)
+    G = Data(1)[6]
+    Id = Data(1)[0]
+
+    " weighted must be True or False"
+    for beta,mu in parameters:
+        mean=np.zeros(100)
+        for i in range(Nb):
+            f=np.random.random()
+            # or we use a specific initial percentage like 0.01
+            #f = 0.1
+            #f = 0.8
+
+            mean += covided(beta,mu,f,w_matrix,Id,G,1,weighted)[2]
+        print(f"computation for {beta,mu} finish")
+        plt.plot(time,mean/Nb,label=r'$\beta$, $\mu$ = ' + f'{beta,mu}')
+
+    plt.xlabel("Time step")
+    plt.ylabel("Population infection percentage")
+    # Reduce the font size of the x and y values
+    plt.tick_params(labelsize=8)
+    plt.legend()
+    if weighted is True:
+
+        plt.title("Evolution of the ratio of infected characters with time step τ, 1000 simulations (Weighted)", size = 9)
+        plt.savefig("pictures/Evolution of the ratio of infected characters with time step (Weighted).png")
+        plt.show()
+
+    elif weighted is False:
+
+        plt.title("Evolution of the ratio of infected characters with time step τ, 1000 simulations (Unweighted)", size = 9)
+        plt.savefig("pictures/Evolution of the ratio of infected characters with time step (Unweighted).png")
+        plt.show()
+    else:
+        return "Error"
 
 
+def average_of_c_for_f(G, N):
+    """ define a function to compute the mean of avrage size of subgraph for a percentage f
+
+    Args:
+        G (graph.networkx): graph for the season S
+        N (int): Number of the avrage
+
+    Returns:
+        total_average_c (list): list of the avrage of c for percentage f at each time
+    """    
+    value_f = np.arange(0, 1.05, 0.05)
+    total_average_c = []
+    average_c = []
+    for f in value_f:
+        for _ in range(N):
+            G_reduced = attack(G, f)
+            size = [len(c) for c in sorted(nx.connected_components(G_reduced), key=len, reverse=True)]
+
+            if len(G_reduced) > 0:
+                average_c.append(np.mean(size))
+            else:
+                average_c.append(0)
+        if N == 1:
+            total_average_c = average_c
+        else:
+            total_average_c.append(np.mean(average_c))
+    return total_average_c
