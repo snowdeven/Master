@@ -25,7 +25,7 @@ for S in range(1,9):             #we made a loop to compute all the data for eac
     Txt_stats(S,G)                               #We write a file of all the stats for the character of the season S
 
 plt.suptitle("GOT-NET for each season", size=8)
-plt.savefig("pictures/GOT-NET for each season.png", dpi=300, format="png")
+
 plt.show()
 
 
@@ -69,7 +69,7 @@ for S in range(1,9):#we made a loop to compute all the data for each season
     Hist_Weight(S)
 
 plt.suptitle("Distribution of the links weight for each season")
-plt.savefig("pictures/Distribution of the links weight for each season.png", format="png")
+
 plt.show()
 #--------------PART_FOUR-------------- #
 
@@ -90,7 +90,7 @@ for S in range(1,9):#we made a loop to compute all the data for each season
                         ,edge_color='gray'
                         ,font_size=7)
         plt.title(f"Season {S} Smallest Connected Components")
-        plt.savefig(f"pictures/Season {S} Smallest Connected Components.png", format="png")
+
         plt.show()
     relative_size=np.array(size)/sum(size)
     
@@ -119,10 +119,10 @@ for N in (1, 100):
     plt.ylabel("Average of c")
     if N == 1:
         plt.title("Evolution of |c| with the fraction of attacked nodes f")
-        plt.savefig("pictures/Evolution of the average of c with f.png")
+
     else:
         plt.title("Evolution of |c| with the fraction of attacked nodes f after 100 samples")
-        plt.savefig("pictures/Evolution of the average of c with f after 100 samples.png")
+
 
     plt.show()
 
