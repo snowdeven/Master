@@ -1,8 +1,8 @@
 program Exercice5
 implicit none
 
-real(kind=4) :: a, b, c, delta, racine_delta, x1, x2
-complex(kind=4) :: x3, x4, i
+real(kind=8) :: a, b, c, delta, racine_delta, x1, x2
+complex(kind=8) :: x3, x4, i
 
 print *, 'Give 3 coefficients a, b, c of the quadratic equation ax**2+bx+c=0'
 read *, a, b, c !read the 3 user's coefficients of the quadratic equation
