@@ -5,13 +5,13 @@ PROGRAM SCHROD
     REAL (KIND=8), DIMENSION(0:N):: V,F,RR
     REAL (KIND=8):: R0,RN,A,B,EPS,TOL,FINIT,ENERG,H,HC,E,DE
     DATA R0/0.1D0/, RN/2.6D0/, A/1.0/, B/1.0/, EPS/1.0D-04/, TOL/1.0D-04/,&
-     FINIT/0.D0/, ENERG/-0.99D0/, NCMAX/30/, IFLAG/1/, M/11/, JLEV/0/
+    FINIT/0.D0/, ENERG/-0.99D0/, NCMAX/30/, IFLAG/1/, M/11/, JLEV/0/
     H=(RN-R0)/DFLOAT(N) ! calculation of the step:
     HC=H*H/B ! expression h2/b
 
     ! calculation of the vector V(0:N) containing the potential
     CALL POT(N,R0,H,A,B,JLEV,RR,V)
-
+    
     ! putting the trial energy value:
     E=ENERG
     NCOUNT=0

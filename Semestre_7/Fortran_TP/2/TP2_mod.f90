@@ -1,7 +1,7 @@
 module TP2_mod
     implicit none
     contains
-        subroutine POT(list,length)
+        subroutine POT
 
         end subroutine 
 
