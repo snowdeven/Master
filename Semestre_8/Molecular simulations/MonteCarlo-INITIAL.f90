@@ -22,10 +22,10 @@ program main
     use Global
     implicit none
 
-    integer :: i, N=1000, io
+    integer :: i, N=10000, io
     real(ww) :: x
     real(ww) :: prob
-    real(ww) :: delta=0.5 ,d,r
+    real(ww) :: delta=3.75,Int=0.0_8,d,r,acc=0
     
     real(ww), allocatable :: position(:)
 
@@ -53,7 +53,7 @@ program main
     print *, ''
 
     ! Monte Carlo calculation
-    N = 1000
+    N = 1000000
 
     print *, "Monte Carlo calculation"
     print *, "------------------"
@@ -69,13 +69,20 @@ program main
         if (min(1.0_8,prob(x+d)/prob(x)) > r ) then
             position(i) = x+d
             x = x+d
+            acc = acc +1
         else
             position(i)= x
         end if
         write(10,*)position(i)
     end do
     close(10)
-	deallocate(position)
+	
 
-    
+
+    print*,"Int_ex",sum(sqrt(position))/N
+    print*,"Int_th",1.512035
+    print*,"relative error =",abs(1.512035 -sum(sqrt(position))/N)/1.512035
+    print*,"pourcentage accept = ",acc/N *100 ,"%"
+
+    deallocate(position)
 end program
