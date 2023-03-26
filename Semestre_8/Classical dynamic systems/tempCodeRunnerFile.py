@@ -1,3 +1,2 @@
-l[0,i] = X1[-1,-1]
-    l[1,i] = X2[-1,-1]
-    l[2,i] = X3[-1,-1]
+
+    return np.linalg.norm([np.linalg.norm(a),np.linalg.norm(b),np.linalg.norm(c)])

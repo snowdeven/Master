@@ -1,0 +1,37 @@
+#!/bin/bash -l
+#
+#$ -V
+#$ -q parallel.q
+#$ -pe mpi 32
+#$ -l h_vmem=0.5G
+#$ -o $JOB_NAME.$JOB_ID.out
+#$ -e $JOB_NAME.$JOB_ID.err
+#$ -N Relaxation
+
+
+# chargement des modules
+module purge
+module load vasp/5.4
+
+# path definition
+WORKDIR=$WORK/$JOB_NAME
+if [ ! -d $WORKDIR ]; then
+  mkdir $WORKDIR
+fi
+
+# copie des inputs/exec dans le repertoire de travail
+for input in INCAR POTCAR KPOINTS POSCAR ; do 
+  cp $input $WORKDIR
+done
+cd $WORKDIR
+
+###############################################
+# exécution
+time mpirun -n $NSLOTS vasp
+###############################################
+
+
+# purge des fichiers
+rm vasprun.xml
+
+
