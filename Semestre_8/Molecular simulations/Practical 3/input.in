@@ -1,0 +1,13 @@
+# Parameters of the simulation:
+#
+336    NumberOfParticles 336
+6000  Nsteps = Total number of simulation steps
+3000     Nsteps_equil = Number of steps which are discarded when computing averages
+-3      Nsteps_rescale = Number of steps of velocity rescaling (or -1: all steps; -2: Berendsen thermostat; -3: Bussi thermostat)
+1      Do an energy minimization first? (0=NO, 1=YES).
+1      Temperature (in reduced LJ units). Used only when velocity rescaling is turned on!
+0.001  Time step   (in reduced LJ units)
+0.8    Density     (in reduced LJ units)
+0     Startup Configuration (0=random, 1=simple cubic lattice, 2=hcp lattice)
+#
+# (Note: the order in which these parameters are listed should not be changed).

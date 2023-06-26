@@ -1,0 +1,7 @@
+mol load vtf traj.vtf
+mol modstyle 0 0 CPK 0.200000 0.000000 8.000000 0.000000
+mol modcolor 0 0 Name
+scale by 0.5
+logfile off
+draw_cell 1 1 1
+pbc box_draw

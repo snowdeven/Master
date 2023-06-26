@@ -3,9 +3,9 @@ use,intrinsic :: ISO_Fortran_env
 implicit none
 
 !================ Parameter of the simulation ======================
-integer, parameter :: N = 10                !lattice made with N*N spins
+integer, parameter :: N = 100           !lattice made with N*N spins
 integer, parameter :: Nsteps = 10000     !nb of MC sweeps (cycles)
-integer, parameter :: Nequil = 0
+integer, parameter :: Nequil = 2000
            !equilibration period
 !--------------------------------------------------------------------
 ! The temperature must be given as argument to this program, for example
@@ -34,9 +34,9 @@ character(len=100) :: filename
 
 
 !Variables to compute averages
-integer(INT64) :: E_acc
+integer(INT64) :: E_acc, E2_acc
 integer(INT64) :: M_acc
-real(REAL64)   :: E_av, M_av
+real(REAL64)   :: E_av, M_av,E2_av
 
 integer, allocatable :: seed(:), mySeed(:)
 integer nbOfSeeds, clock
@@ -85,7 +85,7 @@ else
     open(unit=11,file=trim(filename))
     write(11,*) '# T  E/N  M/N'
 end if
- 
+
 
 !===================================================================
 
@@ -96,28 +96,28 @@ do stepT = 1, NstepT
     print *, 'Simulation ', stepT, '   (T=', T, ')'
 
     print *, 'Initial configuration: '
-     do i = 0, N-1
+    do i = 0, N-1
         do j = 0, N-1
-           call random_number(r)
-                      ! <-- modify this line so that the orientation of the spin is random
-           if (r<0.5) then 
-            spin(i,j) = 1 
-           else
-            spin(i,j) = -1
-           end if
-            ! Hint: use int(...) or floor(...)
+            call random_number(r)
+            if (r<0.5) then 
+                spin(i,j) = 1 
+            else
+                spin(i,j) = -1
+            end if
         end do
-     end do
-     
+    end do
+
     if (NstepT == 1) call display()
- 
+
     M = sum(spin)                   ! <-- Modify this line
     E = energy()
     print *, 'Energy per spin: ', real(E)/Nspins
     print *, 'Magnetization per spin: ', real(M)/Nspins
 
     E_acc = 0                          ! accumulator variable used in the computation of <E>
-    M_acc = 0                          ! accumulator variable used in the computation of <M>
+    M_acc = 0
+    E2_acc = 0 
+                                        ! accumulator variable used in the computation of <M>
 
     do big_step = 1, Nsteps            ! loop over MC sweeps
         do step = 1, Nspins            ! loop to perform 1 sweep over the lattice
@@ -138,29 +138,19 @@ do stepT = 1, NstepT
                 spin(i,j) = -1* spin(i,j)
                 E = E + delta 
                 M = M + 2*spin(i,j)
-            ! else
-            !     spin(i,j) = spin(i,j)
             end if
-            
-
-            !--------------------------------------------------------
-            ! Modify the code here in order to:
-            !   - Choose a spin at random
-            !   - Attempt to flip it
-            !   - Accept or reject this move
-			!     (if the move is accepted, update the spin array and the variables E and M)
-            !--------------------------------------------------------
 
             !Accumulate the values of the energy E and the magnetization M
             if (big_step > Nequil) then
                 E_acc = E_acc + E
+                E2_acc =  E2_acc + E**2
                 M_acc = M_acc + M
             end if
         end do
         
         if (NstepT <= 1 .and. modulo(big_step, 2) == 0) then
-           !Save the observables in file data.dat
-           write(10,*) big_step, real(E)/Nspins, real(M)/Nspins
+            !Save the observables in file data.dat
+            write(10,*) big_step, real(E)/Nspins, real(M)/Nspins
         end if
     end do
     
@@ -171,29 +161,23 @@ do stepT = 1, NstepT
 
     !--------------------------------------------------------
     !Computation of the averages <E> and <M> per spin    (to be completed)
-    E_av = real(E_acc)/((Nsteps-Nequil)*Nspins)          !<-- E_av should contain <E>
-    M_av = real(M_acc)/((Nsteps-Nequil)*Nspins)    
+    E_av = real(E_acc)/((Nsteps-Nequil)*Nspins)         !<-- E_av should contain <E>
+    M_av = real(M_acc)/((Nsteps-Nequil)*Nspins)
+    E2_av = real(E2_acc)/((Nsteps-Nequil)*Nspins)
     !--------------------------------------------------------
 
-    print *, '  - Energy: ', E_av/ Nspins
-    print *, '  - Magnetization: ', M_av/ Nspins
-    
+    print *, '  - Energy: ', E_av/Nspins
+    print *, '  - Magnetization: ', M_av/Nspins
+
     if (NstepT > 1) then
         !Save the averages in file M_xx.dat
-        write(11,*) T, E_av, abs(M_av)
+        write(11,*) T, E_av, abs(M_av)/Nspins ,(E2_av - E_av**2)/T**2
     end if
 
+    print*,"E = ",E,"==  Fct =",energy()
 
-    
-    print*,E,"==",energy()
+    print*,"M = ",M,"==  Sum of spins =",sum(spin)
 
-    print*,M,"==",sum(spin)
-    !--------------------------------------------------------
-    !Final check
-    ! Check that the variable E contains indeed the correct energy by comparing it
-	! to the value returned by energy()
-    !--------------------------------------------------------
-    
 end do
 
 if (NstepT == 1) close(10)

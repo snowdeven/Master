@@ -1,0 +1,8 @@
+{
+    "editor.wordWrap": "off",
+    "editor.minimap.autohide": false,
+    "editor.minimap.scale": 1,
+    "files.associations": {
+        "thermostat_bussi.h": "c"
+    }
+}
